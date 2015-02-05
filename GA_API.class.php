@@ -50,7 +50,10 @@ class GA_API {
 			}
 
 			$param['max-results'] = isset( $args['max_results'] ) ? $args['max_results'] : 1000;
-			$param['filters']     = isset( $args['filters'] ) ? $args['filters'] : false;
+
+			if( isset( $args['filters'] ) ) {
+				$param['filters'] = isset( $args['filters'] ) ? $args['filters'] : false;
+			}
 
 			$metrics = isset( $args['metrics'] ) ? $args['metrics'] : false;
 
@@ -72,6 +75,18 @@ class GA_API {
 					}
 					$cnt++;
 				}
+
+				if( count( $result ) > 1 ) {
+					$array = array();
+					$cnt=0;
+					foreach( $result as $key => $ary ) {
+						foreach( $ary as $k => $a ) {
+							$array[] = $a;
+						}
+					}
+
+					$result = $array;
+				}
 			} else {
 				$result = $this->_call( $start_date, $end_date, $metrics, $param );
 			}
@@ -87,9 +102,12 @@ class GA_API {
 		          date( 'Y-m-d', strtotime( $start_date ) ),
 		          date( 'Y-m-d', strtotime( $end_date ) ),
 		          $metrics, $param );
-
-		if( $result->getRows() ) {
-			$result = $result->getRows();
+		if( $result->containsSampledData ) {
+			return 'Sampled data returned. Please narrow down the date range to avoid data sampling.';
+		} else {
+			if( $result->getRows() ) {
+				$result = $result->getRows();
+			}
 		}
 
 		return $result;
