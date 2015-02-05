@@ -1,0 +1,4 @@
+*.p12
+*.lock
+config.php
+vendor
